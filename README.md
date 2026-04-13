@@ -244,7 +244,8 @@ npm run dev
 
 ## 📸 Screenshots
 
-> Add screenshots to a `/screenshots` folder and link them here.
+<img width="1908" height="909" alt="Screenshot 2026-04-10 230023" src="https://github.com/user-attachments/assets/4788bd79-dbca-4bc2-9471-44855a82020f" />
+
 
 ---
 
