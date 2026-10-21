@@ -16,17 +16,32 @@ connectDb();
 
 const port = process.env.PORT
 const app = express();
+app.set("trust proxy", 1);
 app.use(express.json())
 app.use(cookieParser())
 
+const clientUrls = (process.env.CLIENT_URL || process.env.FRONTEND_URL || "")
+    .split(",")
+    .map(url => url.trim().replace(/\/+$/, ""))
+    .filter(Boolean);
+
 const allowedOrigins = [
     "http://localhost:5173",
-    process.env.CLIENT_URL
-].filter(Boolean);
+    ...clientUrls
+];
 
 app.use(cors({
-    origin: allowedOrigins,
-    credentials: true
+    origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        const cleanOrigin = origin.replace(/\/+$/, "");
+        if (allowedOrigins.includes(cleanOrigin)) {
+            return callback(null, true);
+        }
+        return callback(null, false);
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "Cookie"]
 }))
 
 

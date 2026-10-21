@@ -35,9 +35,9 @@ const SignUp = () => {
       toast.success("Signup successfully")
 
     } catch (error) {
-      console.log(error.response.data);
+      console.log(error);
       setLoading(false);
-      toast.error(error.response.data.message)
+      toast.error(error?.response?.data?.message || error?.message || "Signup failed")
 
     }
   }
@@ -57,7 +57,7 @@ const SignUp = () => {
       
     } catch (error) {
       console.log( error);
-      toast.error(error.response.data.message)
+      toast.error(error?.response?.data?.message || error?.message || "Google signup failed")
     }
   }
 

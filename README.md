@@ -97,13 +97,14 @@ LearnHub/
 
         
 ⚙️ Environment Setup
--Backend (.env)
+Backend (.env)
 ```bash
--PORT=8000
-MONGO_URI=your_mongodb_connection_string
+PORT=8000
+CLIENT_URL=http://localhost:5173
+MONGO_URL=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret
 
-CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_NAME=your_cloudinary_cloud_name
 CLOUDINARY_API_KEY=your_cloudinary_api_key
 CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 
@@ -112,8 +113,8 @@ RAZORPAY_KEY_SECRET=your_razorpay_key_secret
 
 GEMINI_API_KEY=your_gemini_api_key
 
-EMAIL_USER=your_email@gmail.com
-EMAIL_PASS=your_app_password
+USER_EMAIL=your_email@gmail.com
+USER_PASSWORD=your_app_password
 ```
 
 Frontend (.env)
@@ -121,12 +122,13 @@ Frontend (.env)
 VITE_SERVER_URL=http://localhost:8000
 VITE_RAZORPAY_KEY_ID=your_razorpay_key_id
 
-VITE_FIREBASE_API_KEY=your_firebase_api_key
+VITE_FIREBASE_APIKEY=your_firebase_api_key
 VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
 VITE_FIREBASE_PROJECT_ID=your_project_id
 VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
 VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 VITE_FIREBASE_APP_ID=your_app_id
+VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
 ```
 
 🏃 Getting Started
