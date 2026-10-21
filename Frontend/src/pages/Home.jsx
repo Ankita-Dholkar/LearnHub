@@ -2,9 +2,7 @@ import React from 'react'
 import Nav from '../component/Nav'
 import { SiViaplay } from "react-icons/si";
 import Logos from '../component/Logos';
-import home from "../assets/home.png"
 import ai from "../assets/ai.png"
-import ai1 from "../assets/SearchAi.png"
 import { useNavigate } from 'react-router-dom';
 import ExploreCourses from '../component/ExploreCourses';
 import Card from '../component/Card';

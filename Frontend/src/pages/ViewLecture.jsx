@@ -43,10 +43,7 @@ function ViewLecture() {
     fetchProgress();
   }, [courseId]);
 
-  useEffect(() => {
-    if (selectedLecture?._id) markLectureAsCompleted(selectedLecture._id);
-    // eslint-disable-next-line
-  }, [selectedLecture?._id]);
+
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6 flex flex-col md:flex-row gap-5">

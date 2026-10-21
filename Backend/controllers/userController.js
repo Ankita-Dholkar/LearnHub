@@ -21,17 +21,19 @@ export const UpdateProfile = async (req,res) => {
     try {
         const userId = req.userId
         const {name,description} = req.body
-        let photoUrl
-        if(req.file) {
-            photoUrl = await uploadOnCloudinary(req.file.path)
-        }
-        const user = await User.findByIdAndUpdate(userId, {name,description, photoUrl})
 
-        if(!user) {
+        // Build update object dynamically — only set photoUrl if a new file was uploaded
+        const updateFields = { name, description }
+        if(req.file) {
+            updateFields.photoUrl = await uploadOnCloudinary(req.file.path)
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(userId, updateFields, { new: true }).select("-password")
+
+        if(!updatedUser) {
              return res.status(404).json({message:"User not found"})
         }
-        await user.save()
-        return res.status(200).json(user)
+        return res.status(200).json(updatedUser)
 
     } catch (error) {
         return res.status(500).json({message:`update Profile error ${error}`})

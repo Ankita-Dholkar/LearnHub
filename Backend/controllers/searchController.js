@@ -71,6 +71,7 @@ Query: ${input}
 
 
     } catch (error) {
-        console.log(error)
+        console.error("AI Search Error:", error)
+        return res.status(500).json({ message: "AI search failed. Please try again.", error: error.message })
     }
 }

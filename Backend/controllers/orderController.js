@@ -4,8 +4,8 @@ import User from "../models/userModel.js";
 import dotenv from "dotenv"
 dotenv.config()
 const razorpayInstance = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_KEY_SECRET,
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
 })
 
 export const createOrder = async (req, res) => {
@@ -39,10 +39,10 @@ export const createOrder = async (req, res) => {
 
 export const verifyPayment = async (req, res) => {
   try {
-    
-        const {razorpay_order_id , courseId , userId} = req.body
-        const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id)
-        if(orderInfo.status === 'paid') {
+
+    const { razorpay_order_id, courseId, userId } = req.body
+    const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id)
+    if (orderInfo.status === 'paid') {
       // Update user and course enrollment
       const user = await User.findById(userId);
       if (!user.enrolledCourses.includes(courseId)) {

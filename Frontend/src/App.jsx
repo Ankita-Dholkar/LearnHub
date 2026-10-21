@@ -28,7 +28,7 @@ import CourseQuiz from './pages/CourseQuiz'
 import StudentDashboard from './pages/StudentDashboard'
 
 
-export const serverUrl = "http://localhost:8000"
+export const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:8000"
 
 function App() {
   getCurrentUser()

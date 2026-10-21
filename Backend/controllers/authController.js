@@ -22,7 +22,7 @@ export const signUp = async (req, res) => {
         //     })
         // }
         if (password.length < 8) {
-            return res.status(400).json({ message: "Enter Strong password" })
+        return res.status(400).json({ message: "Enter Strong password" })
         }
         let hashPassword = await bcrypt.hash(password, 10)
         const user = await User.create({

@@ -55,15 +55,22 @@ export const editCourse = async (req, res) => {
     try {
         const { courseId } = req.params
         const { title, subTitle, description, level, price, isPublished } = req.body
+
+        let course = await Course.findById(courseId)
+        if (!course) {
+            return res.status(404).json({ message: 'Course not found' })
+        }
+        // Ownership check
+        if (course.creator.toString() !== req.userId.toString()) {
+            return res.status(403).json({ message: 'Forbidden: You are not the creator of this course' })
+        }
+
         let thumbnail
         if (req.file) {
             thumbnail = await uploadOnCloudinary(req.file.path)
         }
-        let course = await Course.findById(courseId)
-        if (!course) {
-            return res.status(400).json({ message: 'Course is not found' })
-        }
-        const updateData = { title, subTitle, description, level, price, thumbnail, isPublished }
+        const updateData = { title, subTitle, description, level, price, isPublished }
+        if (thumbnail) updateData.thumbnail = thumbnail
 
         course = await Course.findByIdAndUpdate(courseId, updateData, { new: true })
         return res.status(200).json(course)
@@ -94,6 +101,10 @@ export const removeCourse = async (req, res) => {
         if (!course) {
             return res.status(404).json({ message: "Course not found" });
         }
+        // Ownership check
+        if (course.creator.toString() !== req.userId.toString()) {
+            return res.status(403).json({ message: 'Forbidden: You are not the creator of this course' });
+        }
 
         await course.deleteOne();
         return res.status(200).json({ message: "Course Removed Successfully" });
@@ -113,12 +124,17 @@ export const createLecture = async (req, res) => {
         if (!lectureTitle || !courseId) {
             return res.status(400).json({ message: "Lecture Title required" })
         }
-        const lecture = await Lecture.create({ lectureTitle })
         const course = await Course.findById(courseId)
-        if (course) {
-            course.lectures.push(lecture._id)
-
+        if (!course) {
+            return res.status(404).json({ message: "Course not found" })
         }
+        // Ownership check
+        if (course.creator.toString() !== req.userId.toString()) {
+            return res.status(403).json({ message: 'Forbidden: You are not the creator of this course' })
+        }
+
+        const lecture = await Lecture.create({ lectureTitle })
+        course.lectures.push(lecture._id)
         await course.populate("lectures")
         await course.save()
         return res.status(201).json({ lecture, course })
@@ -152,6 +168,12 @@ export const editLecture = async (req, res) => {
         if (!lecture) {
             return res.status(404).json({ message: "Lecture not found" })
         }
+        // Ownership check: find the course that owns this lecture
+        const ownerCourse = await Course.findOne({ lectures: lectureId })
+        if (!ownerCourse || ownerCourse.creator.toString() !== req.userId.toString()) {
+            return res.status(403).json({ message: 'Forbidden: You are not the creator of this course' })
+        }
+
         let videoUrl
         if (req.file) {
             videoUrl = await uploadOnCloudinary(req.file.path)
@@ -177,19 +199,24 @@ export const editLecture = async (req, res) => {
 export const removeLecture = async (req, res) => {
     try {
         const { lectureId } = req.params
-        const lecture = await Lecture.findByIdAndDelete(lectureId)
+        const lecture = await Lecture.findById(lectureId)
         if (!lecture) {
             return res.status(404).json({ message: "Lecture not found" })
         }
-        //remove the lecture from associated course
+        // Ownership check: find the course that owns this lecture
+        const ownerCourse = await Course.findOne({ lectures: lectureId })
+        if (!ownerCourse || ownerCourse.creator.toString() !== req.userId.toString()) {
+            return res.status(403).json({ message: 'Forbidden: You are not the creator of this course' })
+        }
 
+        await Lecture.findByIdAndDelete(lectureId)
+        // Remove the lecture reference from associated course
         await Course.updateOne(
             { lectures: lectureId },
             { $pull: { lectures: lectureId } }
         )
-        return res.status(200).json({ message: "Lecture Remove Successfully" })
+        return res.status(200).json({ message: "Lecture Removed Successfully" })
     }
-
     catch (error) {
         return res.status(500).json({ message: `Failed to remove Lectures ${error}` })
     }
