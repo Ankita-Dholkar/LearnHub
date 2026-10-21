@@ -161,10 +161,4 @@ npm run dev
 5. Instant scoring
 
 ---
-📄 License
 
-<<<<<<< HEAD
- MIT License
-=======
- MIT License
->>>>>>> c685800eebfbe4dd34f0754bf944452d96bee86b
