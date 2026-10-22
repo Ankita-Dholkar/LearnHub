@@ -46,7 +46,7 @@ function Login() {
             let user = response.user
             let name = user.displayName;
             let email = user.email
-            let role = ""
+            let role = "student"
 
             const result = await axios.post(serverUrl + "/api/auth/googlesignup", { name, email, role }
                 , { withCredentials: true }

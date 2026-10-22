@@ -20,12 +20,21 @@ export const getCurrentUser = async (req,res) => {
 export const UpdateProfile = async (req,res) => {
     try {
         const userId = req.userId
-        const {name,description} = req.body
+        const {name, description, role} = req.body
 
         // Build update object dynamically — only set photoUrl if a new file was uploaded
-        const updateFields = { name, description }
-        if(req.file) {
-            updateFields.photoUrl = await uploadOnCloudinary(req.file.path)
+        const updateFields = {}
+        if (name !== undefined) updateFields.name = name
+        if (description !== undefined) updateFields.description = description
+        if (role && ["student", "educator"].includes(role)) {
+            updateFields.role = role
+        }
+
+        if (req.file) {
+            const uploadedPhoto = await uploadOnCloudinary(req.file.path)
+            if (uploadedPhoto) {
+                updateFields.photoUrl = uploadedPhoto
+            }
         }
 
         const updatedUser = await User.findByIdAndUpdate(userId, updateFields, { new: true }).select("-password")
@@ -36,6 +45,7 @@ export const UpdateProfile = async (req,res) => {
         return res.status(200).json(updatedUser)
 
     } catch (error) {
-        return res.status(500).json({message:`update Profile error ${error}`})
+        console.error("UpdateProfile error:", error)
+        return res.status(500).json({message:`Update Profile error: ${error.message || error}`})
     }
 }

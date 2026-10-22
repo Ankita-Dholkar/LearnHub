@@ -1,6 +1,5 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import axios from 'axios'
-import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { serverUrl } from '../App'
 import { setUserData } from '../redux/userSlice'
@@ -10,40 +9,53 @@ import { useNavigate } from 'react-router-dom'
 import { FaArrowLeftLong } from "react-icons/fa6";
 
 const EditProfile = () => {
-  let { userData } = useSelector(state => state.user)
-  let [name, setName] = useState(userData.name || "")
-  let [description, setDescription] = useState(userData.description || "")
-  let [photoUrl, setPhotoUrl] = useState(null)
-  let dispatch = useDispatch()
-  let [loading, setLoading] = useState(false)
-  let navigate = useNavigate()
+  const { userData } = useSelector(state => state.user)
+  const [name, setName] = useState(userData?.name || "")
+  const [description, setDescription] = useState(userData?.description || "")
+  const [role, setRole] = useState(userData?.role || "student")
+  const [photoUrl, setPhotoUrl] = useState(null)
+  const [previewUrl, setPreviewUrl] = useState("")
+  const dispatch = useDispatch()
+  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
 
-  const formData = new FormData()
-  formData.append("name", name)
-  formData.append("description", description)
-  formData.append("photoUrl", photoUrl)
+  useEffect(() => {
+    if (userData) {
+      if (userData.name) setName(userData.name)
+      if (userData.description) setDescription(userData.description)
+      if (userData.role) setRole(userData.role)
+    }
+  }, [userData])
 
-
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setPhotoUrl(file)
+      setPreviewUrl(URL.createObjectURL(file))
+    }
+  }
 
   const updateProfile = async () => {
     setLoading(true)
     try {
+      const formData = new FormData()
+      formData.append("name", name)
+      formData.append("description", description)
+      formData.append("role", role)
+      if (photoUrl) {
+        formData.append("photoUrl", photoUrl)
+      }
+
       const result = await axios.post(serverUrl + "/api/user/updateprofile", formData, { withCredentials: true })
-      console.log(result.data)
       dispatch(setUserData(result.data))
-      navigate("/")
-      setLoading(true)
-
-      toast.success("Profile Update Successfully")
-
-
-
+      toast.success("Profile Updated Successfully")
+      navigate("/profile")
     } catch (error) {
-      console.log(error)
-      toast.error("Profile Update Error")
+      console.error("Profile update error:", error)
+      toast.error(error?.response?.data?.message || error?.message || "Profile Update Error")
+    } finally {
       setLoading(false)
     }
-
   }
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50/50 to-white px-4 py-10 overflow-hidden">
@@ -58,23 +70,26 @@ const EditProfile = () => {
           {/* Profile Photo */}
 
           <div className="flex flex-col items-center text-center">
-            {userData.photoUrl ? <img
-              src={userData?.photoUrl}
-              alt=""
-              className="w-24 h-24 rounded-full border-4 border-white shadow-lg shadow-blue-100 object-cover"
-            /> : <div className='w-24 h-24 rounded-full text-blue-600 bg-blue-50 flex items-center justify-center text-[30px] font-bold border-4 border-white shadow-lg shadow-blue-100 cursor-pointer'>
-              {userData?.name?.slice(0, 1)?.toUpperCase()}
-            </div>}
+            {previewUrl || userData?.photoUrl ? (
+              <img
+                src={previewUrl || userData?.photoUrl}
+                alt="Profile Avatar"
+                className="w-24 h-24 rounded-full border-4 border-white shadow-lg shadow-blue-100 object-cover"
+              />
+            ) : (
+              <div className='w-24 h-24 rounded-full text-blue-600 bg-blue-50 flex items-center justify-center text-[30px] font-bold border-4 border-white shadow-lg shadow-blue-100 cursor-pointer'>
+                {userData?.name?.slice(0, 1)?.toUpperCase() || "U"}
+              </div>
+            )}
           </div>
           <div>
             <label className="text-sm font-medium text-gray-700">Select Avatar</label>
             <input
               type="file"
               name="photoUrl"
-
-              placeholder="Photo URL"
+              accept="image/*"
               className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:border-blue-400 focus:ring-4 focus:ring-blue-50 transition-all cursor-pointer"
-              onChange={(e) => setPhotoUrl(e.target.files[0])}
+              onChange={handleFileChange}
             />
           </div>
 
@@ -97,11 +112,29 @@ const EditProfile = () => {
             <label className="text-sm font-medium text-gray-700">Email</label>
             <input
               type="email"
-
               readOnly
               className="w-full mt-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-500 cursor-not-allowed"
-              placeholder={userData.email}
+              placeholder={userData?.email}
             />
+          </div>
+
+          {/* Role Selection */}
+          <div>
+            <label className="text-sm font-medium text-gray-700">Account Role</label>
+            <div className='flex w-full items-center justify-center gap-4 mt-2'>
+              <div
+                className={`flex-1 text-center px-4 py-2.5 border rounded-xl cursor-pointer transition-all font-medium text-sm ${role === "student" ? "border-blue-500 bg-blue-50 text-blue-700 ring-2 ring-blue-100" : "border-gray-200 text-gray-500 hover:border-blue-300 hover:bg-gray-50"}`}
+                onClick={() => setRole("student")}
+              >
+                Student
+              </div>
+              <div
+                className={`flex-1 text-center px-4 py-2.5 border rounded-xl cursor-pointer transition-all font-medium text-sm ${role === "educator" ? "border-blue-500 bg-blue-50 text-blue-700 ring-2 ring-blue-100" : "border-gray-200 text-gray-500 hover:border-blue-300 hover:bg-gray-50"}`}
+                onClick={() => setRole("educator")}
+              >
+                Educator
+              </div>
+            </div>
           </div>
 
 

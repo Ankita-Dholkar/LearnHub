@@ -149,9 +149,9 @@ export const googleSignup = async (req,res) => {
         let user = await User.findOne({email})
         if(!user) {
             user = await User.create({
-                name,
+                name: name || "User",
                 email,
-                role
+                role: (role && role.trim()) ? role : "student"
             })
         }
 
