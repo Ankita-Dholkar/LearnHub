@@ -4,7 +4,11 @@ import bcrypt from "bcryptjs"
 import genToken from "../config/token.js"
 import sendMail from "../config/sendMail.js"
 
-const isProduction = process.env.NODE_ENV === "production" || !!process.env.RENDER;
+const isProduction = process.env.NODE_ENV === "production" || 
+                     Boolean(process.env.RENDER) || 
+                     Boolean(process.env.VERCEL) || 
+                     Boolean(process.env.RAILWAY_ENVIRONMENT) ||
+                     Boolean(process.env.CLIENT_URL && process.env.CLIENT_URL.startsWith("https"));
 
 const getCookieOptions = () => ({
     httpOnly: true,
@@ -18,20 +22,13 @@ export const signUp = async (req, res) => {
         const { name, email, password, role } = req.body
         let existUser = await User.findOne({ email })
         if (existUser) {
-            // console.log("user already exists");
-
             return res.status(400).json({ message: "User is already exist" })
         }
         if (!validator.isEmail(email)) {
             return res.status(400).json({ message: "Enter Valid email" })
         }
-        // if(!name || !email || !password || !role) {
-        //     return res.status(400).json({
-        //         message: "All fields are required"
-        //     })
-        // }
         if (password.length < 8) {
-        return res.status(400).json({ message: "Enter Strong password" })
+            return res.status(400).json({ message: "Enter Strong password" })
         }
         let hashPassword = await bcrypt.hash(password, 10)
         const user = await User.create({
@@ -40,10 +37,11 @@ export const signUp = async (req, res) => {
             password: hashPassword,
             role,
         })
-        //token generation after the user gets authenticated
         let token = await genToken(user._id)
         res.cookie("token", token, getCookieOptions())
-        return res.status(201).json(user)
+        const userObj = user.toObject ? user.toObject() : { ...user._doc }
+        userObj.token = token
+        return res.status(201).json(userObj)
 
     } catch (error) {
         return res.status(500).json({ message: `SignUp error ${error}` })
@@ -63,7 +61,9 @@ export const login = async (req, res) => {
         }
         let token = await genToken(user._id)
         res.cookie("token", token, getCookieOptions())
-        return res.status(200).json(user)
+        const userObj = user.toObject ? user.toObject() : { ...user._doc }
+        userObj.token = token
+        return res.status(200).json(userObj)
     } catch (error) {
         return res.status(500).json({ message: `Login error ${error}` })
     }
@@ -71,15 +71,15 @@ export const login = async (req, res) => {
 
 export const logout = async (req, res) => {
     try {
-        await res.clearCookie("token", {
+        res.clearCookie("token", {
             httpOnly: true,
             secure: isProduction,
             sameSite: isProduction ? "none" : "lax"
-        }) //clear token
+        })
         return res.status(200).json({ message: "LogOut Success" })
     }
     catch (error) {
-
+        return res.status(500).json({ message: `Logout error: ${error.message}` })
     }
 }
 
@@ -90,12 +90,11 @@ export const sendOTP = async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: "User not found" })
         }
-        // Generate  OTP
-        const otp = Math.floor(1000 + Math.random() * 9000).toString(); // Generate a 4-digit OTP
+        const otp = Math.floor(1000 + Math.random() * 9000).toString();
 
-        user.resetOtp = otp,
-            user.otpExpires = Date.now() + 5 * 60 * 1000, //otp will expire in 5 min
-            user.isOtpVerified = false
+        user.resetOtp = otp;
+        user.otpExpires = Date.now() + 5 * 60 * 1000;
+        user.isOtpVerified = false;
 
         await user.save()
         await sendMail(email, otp)
@@ -113,10 +112,10 @@ export const verifyOTP = async (req, res) => {
             return res.status(404).json({ message: "Invalid OTP" })
         }
         user.isOtpVerified = true
-        user.resetOtp = undefined, //set to undefined
-            user.otpExpires = undefined,
+        user.resetOtp = undefined;
+        user.otpExpires = undefined;
 
-            await user.save();
+        await user.save();
         return res.status(200).json({ message: "Otp verified successfully" })
 
     } catch (error) {
@@ -124,20 +123,16 @@ export const verifyOTP = async (req, res) => {
     }
 }
 
-
-//controller for reset password
 export const resetPassword = async (req, res) => {
-
     try {
-
         const { email, password } = req.body
         const user = await User.findOne({ email })
         if (!user || !user.isOtpVerified) {
             return res.status(404).json({ message: "OTP verification is required" })
         }
         const hashPassword = await bcrypt.hash(password, 10)
-        user.password = hashPassword,
-            user.isOtpVerified = false
+        user.password = hashPassword;
+        user.isOtpVerified = false;
 
         await user.save()
         return res.status(200).json({ message: "Reset password successfully" })
@@ -148,27 +143,25 @@ export const resetPassword = async (req, res) => {
     }
 }
 
-
 export const googleSignup = async (req,res) => {
-
     try {
-       const {name, email, role} = req.body
-    let user = await User.findOne({email})
-    if(!user) {
-        user = await User.create({
-            name,
-            email,
-            role
-        })
-    }
+        const {name, email, role} = req.body
+        let user = await User.findOne({email})
+        if(!user) {
+            user = await User.create({
+                name,
+                email,
+                role
+            })
+        }
 
-    let token = await genToken(user._id) 
-    res.cookie("token", token, getCookieOptions());
-
-    return res.status(200).json(user);
+        let token = await genToken(user._id) 
+        res.cookie("token", token, getCookieOptions());
+        const userObj = user.toObject ? user.toObject() : { ...user._doc }
+        userObj.token = token
+        return res.status(200).json(userObj);
 
     } catch (error) {
         return res.status(500).json({message:`GoogleAuth error ${error}`})
     }
-    
 }

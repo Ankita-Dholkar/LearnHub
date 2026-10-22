@@ -57,7 +57,7 @@ const ForgetPassword = () => {
         return toast.error("Password is not matched")
       }
       const result = await axios.post(serverUrl + "/api/auth/resetpassword",
-      { email, password: newPassword }, {withCredentials: true })
+        { email, password: newPassword }, { withCredentials: true })
       console.log(result.data);
       setLoading(false)
       navigate("/login")
@@ -75,7 +75,7 @@ const ForgetPassword = () => {
     <div className='relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-b from-blue-50/50 to-white px-4'>
       <div className='absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-200/30 blur-[120px] rounded-full pointer-events-none' />
       <div className='absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-sky-200/30 blur-[120px] rounded-full pointer-events-none' />
-      
+
       {/* step 1 */}
       {step == 1 && <div className='relative z-10 bg-white shadow-2xl shadow-blue-100/50 rounded-3xl p-8 max-w-md w-full border border-white/50 backdrop-blur-sm'>
         <h2 className='text-2xl font-bold mb-6 text-center
@@ -131,7 +131,7 @@ const ForgetPassword = () => {
             <input id='confirmPassword' type="text" className='border w-full h-[45px] rounded-xl border-gray-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-50 outline-none transition-all px-[20px] text-gray-800 mt-1' placeholder='**********' required
               onChange={(e) => setConPassword(e.target.value)} value={conPassword} />
           </div>
-          <button className='w-full h-[45px] bg-blue-600 hover:bg-blue-700 text-white font-bold transition-all shadow-lg shadow-blue-200 cursor-pointer flex items-center justify-center rounded-xl mt-4' disabled={loading} onClick={(e) => {resetPassword(e)}}>{loading? <ClipLoader size={24} color='white'/> : "Reset Password"}</button>
+          <button className='w-full h-[45px] bg-blue-600 hover:bg-blue-700 text-white font-bold transition-all shadow-lg shadow-blue-200 cursor-pointer flex items-center justify-center rounded-xl mt-4' disabled={loading} onClick={(e) => { resetPassword(e) }}>{loading ? <ClipLoader size={24} color='white' /> : "Reset Password"}</button>
         </form>
         <div className='text-sm text-center mt-6 text-gray-500 hover:text-blue-600 cursor-pointer transition-colors' onClick={() => navigate("/login")}>Back to Login</div>
 

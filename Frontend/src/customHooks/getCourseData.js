@@ -7,21 +7,21 @@ import React from 'react'
 
 const getCourseData = () => {
   const dispatch = useDispatch()
-  const {userData} = useSelector((state)=>state.user)
+  const { userData } = useSelector((state) => state.user)
 
-  useEffect(()=>{
+  useEffect(() => {
     const getAllPublishedCourse = async () => {
       try {
-        const result = await axios.get(serverUrl + "/api/course/getpublished" , {withCredentials:true})
+        const result = await axios.get(serverUrl + "/api/course/getpublished", { withCredentials: true })
         console.log(result.data)
         dispatch(setCourseData(result.data))
-        
+
       } catch (error) {
         console.log(error)
       }
     }
     getAllPublishedCourse()
-  },[])
+  }, [])
 
 }
 

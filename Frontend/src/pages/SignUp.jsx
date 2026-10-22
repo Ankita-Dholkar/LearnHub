@@ -29,6 +29,9 @@ const SignUp = () => {
     try {
       const result = await axios.post(serverUrl + "/api/auth/signup", { name, password, email, role },
         { withCredentials: true }) //by doing withcredentials token gets stored in cookies
+      if (result.data?.token) {
+        localStorage.setItem("token", result.data.token)
+      }
       dispatch(setUserData(result.data))
       setLoading(false);
       navigate("/")
@@ -47,17 +50,24 @@ const SignUp = () => {
       const response = await signInWithPopup(auth, provider);
       console.log(response);
       let user = response.user;
-      let name =  user.displayName;
+      let name = user.displayName;
       let email = user.email;
 
-      const result = await axios.post(serverUrl + "/api/auth/googlesignup",{name,email,role},{withCredentials:true})
+      const result = await axios.post(serverUrl + "/api/auth/googlesignup", { name, email, role }, { withCredentials: true })
+      if (result.data?.token) {
+        localStorage.setItem("token", result.data.token)
+      }
       dispatch(setUserData(result.data))
       navigate("/")
       toast.success("Signup successfully")
-      
+
     } catch (error) {
-      console.log( error);
-      toast.error(error?.response?.data?.message || error?.message || "Google signup failed")
+      console.log(error);
+      if (error?.code === "auth/unauthorized-domain") {
+        toast.error("Domain unauthorized in Firebase! Add your Vercel domain to Firebase Console > Authorized Domains.")
+      } else {
+        toast.error(error?.response?.data?.message || error?.message || "Google signup failed")
+      }
     }
   }
 
@@ -65,7 +75,7 @@ const SignUp = () => {
     <div className='relative w-full min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-b from-blue-50/50 to-white'>
       <div className='absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-200/30 blur-[120px] rounded-full' />
       <div className='absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-sky-200/30 blur-[120px] rounded-full' />
-      
+
       <div className='relative z-10 w-full max-w-4xl px-4 flex items-center justify-center mt-6 mb-6'>
         <form className='w-full min-h-[600px] bg-white shadow-2xl shadow-blue-100/50 rounded-3xl flex overflow-hidden border border-white/50 backdrop-blur-sm' onSubmit={(e) => e.preventDefault()}>
           {/* left div */}
@@ -74,7 +84,7 @@ const SignUp = () => {
               <h1 className='font-bold text-gray-900 text-3xl tracking-tight'>Let's get started</h1>
               <h2 className='text-gray-500 mt-2 text-[16px]'>Create your account</h2>
             </div>
-            
+
             <div className='flex flex-col gap-1 w-full relative'>
               <label htmlFor="name" className='font-semibold text-gray-700 ml-1'>Name</label>
               <input id='name' type="text" className='border w-full h-[45px] rounded-xl border-gray-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-50 outline-none transition-all px-[20px] text-gray-800' placeholder='Your name' onChange={(e) => setName(e.target.value)} value={name} />
@@ -93,50 +103,50 @@ const SignUp = () => {
             </div>
 
             <div className='flex w-full items-center justify-center gap-4 mt-1'>
-              <div 
-                className={`flex-1 text-center px-4 py-2 border rounded-xl cursor-pointer transition-all font-medium ${role === "student" ? "border-blue-500 bg-blue-50 text-blue-700 ring-2 ring-blue-100" : "border-gray-200 text-gray-500 hover:border-blue-300 hover:bg-gray-50"}`} 
+              <div
+                className={`flex-1 text-center px-4 py-2 border rounded-xl cursor-pointer transition-all font-medium ${role === "student" ? "border-blue-500 bg-blue-50 text-blue-700 ring-2 ring-blue-100" : "border-gray-200 text-gray-500 hover:border-blue-300 hover:bg-gray-50"}`}
                 onClick={() => setRole("student")}
               >
                 Student
               </div>
-              <div 
-                className={`flex-1 text-center px-4 py-2 border rounded-xl cursor-pointer transition-all font-medium ${role === "educator" ? "border-blue-500 bg-blue-50 text-blue-700 ring-2 ring-blue-100" : "border-gray-200 text-gray-500 hover:border-blue-300 hover:bg-gray-50"}`} 
+              <div
+                className={`flex-1 text-center px-4 py-2 border rounded-xl cursor-pointer transition-all font-medium ${role === "educator" ? "border-blue-500 bg-blue-50 text-blue-700 ring-2 ring-blue-100" : "border-gray-200 text-gray-500 hover:border-blue-300 hover:bg-gray-50"}`}
                 onClick={() => setRole("educator")}
               >
                 Educator
               </div>
             </div>
-            
+
             <button className='w-full h-[45px] bg-blue-600 hover:bg-blue-700 text-white font-bold transition-all shadow-lg shadow-blue-200 cursor-pointer flex items-center justify-center rounded-xl mt-2' onClick={handleSignup} disabled={loading}>
               {loading ? <ClipLoader size={24} color='white' /> : "Sign Up"}
             </button>
-            
+
             <div className='w-full flex items-center gap-3 my-1'>
               <div className='flex-1 h-[1px] bg-gray-200'></div>
               <div className='text-[14px] text-gray-400 font-medium'>Or continue with</div>
               <div className='flex-1 h-[1px] bg-gray-200'></div>
             </div>
-            
+
             <button className='w-full h-[45px] border border-gray-200 hover:border-blue-200 hover:bg-blue-50/50 rounded-xl flex items-center justify-center gap-3 transition-all' onClick={googleSignUp}>
               <img src={google} className='w-[20px] rounded-full' alt="Google" />
               <span className='text-[15px] font-medium text-gray-700'>Google</span>
             </button>
-            
+
             <div className='text-gray-500 text-[14px] mt-1'>
-              Already have an account? 
+              Already have an account?
               <span className='font-semibold text-blue-600 hover:underline cursor-pointer ml-1' onClick={() => navigate("/login")}>Login</span>
             </div>
           </div>
-          
+
           {/* right div */}
           <div className='w-[50%] bg-gradient-to-br from-blue-600 to-sky-600 md:flex items-center justify-center flex-col hidden p-8 relative overflow-hidden'>
             <div className='absolute top-[-20%] right-[-20%] w-[60%] h-[60%] bg-white/10 blur-[80px] rounded-full'></div>
             <div className='absolute bottom-[-20%] left-[-20%] w-[60%] h-[60%] bg-white/10 blur-[80px] rounded-full'></div>
-            
+
             <img src={logo} alt="LearnHub Logo" className='w-40 drop-shadow-2xl mb-8 relative z-10' />
             <span className='text-white text-5xl font-black tracking-tighter relative z-10'>LearnHub</span>
             <p className='text-blue-100 mt-6 text-center max-w-sm text-lg leading-relaxed relative z-10 font-medium'>
-                Begin your learning journey and connect with expert educators.
+              Begin your learning journey and connect with expert educators.
             </p>
           </div>
         </form>

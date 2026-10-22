@@ -56,11 +56,11 @@ function App() {
         <Route path='/editlecture/:courseId/:lectureId' element={userData ? <EditLecture /> : <Navigate to={"/login"} />} />
         <Route path='/viewcourse/:courseId' element={<ViewCourse />} />
         <Route path='/viewlecture/:courseId' element={userData ? <ViewLecture /> : <Navigate to={"/login"} />} />
-         <Route path='/enrolledcourses' element={userData?<EnrolledCourse/>:<Navigate to={"/login"}/>}/>
-         <Route path='/searchwithai' element={<SearchWithAi/>}/>
-         <Route path='/course/:courseId/quiz' element={userData?<CourseQuiz/>:<Navigate to={"/login"}/>}/>
-         <Route path='/student-dashboard' element={userData?<StudentDashboard/>:<Navigate to={"/login"}/>}/>
-         <Route path='/forgotpassword' element={<ForgotPassword/>}/>
+        <Route path='/enrolledcourses' element={userData ? <EnrolledCourse /> : <Navigate to={"/login"} />} />
+        <Route path='/searchwithai' element={<SearchWithAi />} />
+        <Route path='/course/:courseId/quiz' element={userData ? <CourseQuiz /> : <Navigate to={"/login"} />} />
+        <Route path='/student-dashboard' element={userData ? <StudentDashboard /> : <Navigate to={"/login"} />} />
+        <Route path='/forgotpassword' element={<ForgotPassword />} />
       </Routes>
     </>
   )
